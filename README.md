@@ -131,13 +131,14 @@ dependencies {
 
 ``` kotlin
 // Parse JSON
-val testJson = """
+val jsonElement = """
     {
         "docScore": 0.5,
         "title": "Test Document"
     }
-""".trimIndent()
-val jsonElement = Json.parseToJsonElement(testJson)
+""".let {
+    Json.parseToJsonElement(it)
+}
 
 // Get raw JsonElements
 val result = JsonPath("$['docScore']").eval(jsonElement)
@@ -163,4 +164,11 @@ class MyFunction : JPFunctionHandler {
         return JsonPrimitive("Custom function result")
     }
 }
+
+// Add it when boostrapping the application
+fun bootstrap() {
+    JPFunction.addFunctionHandler(MyFunction())
+}
+
+
 ```
