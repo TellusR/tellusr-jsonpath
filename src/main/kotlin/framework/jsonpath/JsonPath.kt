@@ -186,7 +186,7 @@ class JsonPath(val path: String) {
      * @param root The JSON element to evaluate against
      * @return String representation of matched elements or null if none found
      */
-    fun getContent(root: JsonElement): String? =
+    fun evalContent(root: JsonElement): String? =
         // Evaluate the path and transform results to string representation
         eval(root)?.mapNotNull { result ->
             when (result) {
