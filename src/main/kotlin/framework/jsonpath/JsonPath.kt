@@ -86,7 +86,7 @@ class JsonPath(val path: String) {
 
     private fun compile(p: String) {
         // Initialize tokenizer with trimmed input path
-        var tokenizer = JPTokenizer(p.trim())
+        val tokenizer = JPTokenizer(p.trim())
 
         while (tokenizer.hasMore()) {
             if (!tokenizer.token().firstOrNull().let { it == '"' || it == '\'' }) {
