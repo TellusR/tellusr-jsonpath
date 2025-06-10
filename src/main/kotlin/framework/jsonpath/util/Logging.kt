@@ -1,4 +1,4 @@
-package com.tellusr.framework.util
+package com.tellusr.framework.jsonpath.util
 
 import org.slf4j.LoggerFactory
 

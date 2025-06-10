@@ -6,8 +6,8 @@ import com.tellusr.framework.jsonpath.path.JPFunction
 import com.tellusr.framework.jsonpath.path.JPObject
 import com.tellusr.framework.jsonpath.path.JPRoot
 import com.tellusr.framework.jsonpath.path.JPTokenizer
-import com.tellusr.framework.util.getAutoNamedLogger
-import com.tellusr.framework.util.messageAndCrumb
+import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
+import com.tellusr.framework.jsonpath.util.messageAndCrumb
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
