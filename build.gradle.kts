@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.tellusr"
-version = "0.9"
+version = "0.9.1"
 
 repositories {
     mavenCentral()
@@ -27,4 +27,30 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(21)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+
+            groupId = group as String
+            artifactId = "tellusr-jsonpath"
+            version = version as String
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/tellusr/framework")
+            credentials {
+                username = project.findProperty("gpr.user")?.toString()
+                    ?: System.getenv("GITHUB_USERNAME")
+                            ?: System.getenv("GH_USERNAME")
+                password = project.findProperty("gpr.key")?.toString()
+                    ?: System.getenv("GITHUB_TOKEN")
+                            ?: System.getenv("GH_TOKEN")
+            }
+        }
+    }
 }
