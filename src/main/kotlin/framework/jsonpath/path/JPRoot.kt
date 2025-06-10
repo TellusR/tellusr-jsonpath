@@ -3,11 +3,11 @@ package com.tellusr.framework.jsonpath.path
 import kotlinx.serialization.json.JsonElement
 
 class JPRoot(val key: String = "$"): JPBase() {
-    override fun get(je: JsonElement): List<JsonElement>? =
+    override fun get(jsonElement: JsonElement): List<JsonElement>? =
         if(child == null) {
-            listOf(je)
+            listOf(jsonElement)
         }
         else {
-            child!!.get(je)
+            child!!.get(jsonElement)
         }
 }

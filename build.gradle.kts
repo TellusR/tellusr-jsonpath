@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.1.20"
+    `maven-publish`
 }
 
 group = "com.tellusr"

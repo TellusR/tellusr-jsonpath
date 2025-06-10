@@ -25,8 +25,8 @@ class JPArray(val key: String) : JPBase() {
         }
     }
 
-    override fun get(je: JsonElement): List<JsonElement>? =
-        je.jsonArray?.let { array ->
+    override fun get(jsonElement: JsonElement): List<JsonElement>? =
+        jsonElement.jsonArray?.let { array ->
             val r = range(array)
             r.mapNotNull { i ->
                 val element = array.get(i)
