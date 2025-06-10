@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlinx.serialization.encodeToString
 
 class JsonPathTest {
     @Test

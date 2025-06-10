@@ -2,6 +2,7 @@ package com.tellusr.framework.jsonpath.path
 
 import com.tellusr.framework.jsonpath.function.JPFunCsv
 import com.tellusr.framework.jsonpath.function.JPFunFormat
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
@@ -15,7 +16,7 @@ class JPFunction(val f: String) {
                 if(it.size == 1) {
                     JsonPrimitive(
                         "```\n" +
-                                jsonEncoder.encodeToString(it.first())
+                                jsonEncoder.encodeToString<JsonElement>(it.first())
                                 + "\n```"
                     )
                 }

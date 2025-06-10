@@ -8,6 +8,7 @@ import com.tellusr.framework.jsonpath.path.JPRoot
 import com.tellusr.framework.jsonpath.path.JPTokenizer
 import com.tellusr.framework.util.getAutoNamedLogger
 import com.tellusr.framework.util.messageAndCrumb
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
@@ -194,7 +195,7 @@ class JsonPath(val path: String) {
                 // Extract primitive values directly
                 is JsonPrimitive -> result.jsonPrimitive.contentOrNull
                 // Convert complex objects to JSON string
-                else -> JsonPath.jsonEncoder.encodeToString(result)
+                else -> jsonEncoder.encodeToString<JsonElement>(result)
             }
             // Join results with newlines and return null if empty
         }?.joinToString("\n")?.ifBlank { null }
