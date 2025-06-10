@@ -30,12 +30,7 @@ class JPArray(val key: String) : JPBase() {
             val r = range(array)
             r.mapNotNull { i ->
                 val element = array.get(i)
-                // logger.info(jsonEncoder.encodeToString(element))
-                if (child != null) {
-                    child?.get(element)
-                } else {
-                    listOf(element)
-                }
+                child?.get(element) ?: listOf(element)
             }.flatten()
         } ?: listOf()
 

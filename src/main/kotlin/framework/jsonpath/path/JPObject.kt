@@ -7,11 +7,7 @@ import kotlinx.serialization.json.jsonObject
 class JPObject(val key: String) : JPBase() {
     override fun get(jsonElement: JsonElement): List<JsonElement>? {
         return jsonElement.jsonObject.get(key)?.let { element ->
-            if (child != null) {
-                child?.get(element)
-            } else {
-                listOf(element)
-            }
+            child?.get(element) ?: listOf(element)
         }
     }
 
