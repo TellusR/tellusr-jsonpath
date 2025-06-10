@@ -45,16 +45,20 @@ class JsonPath(val path: String) {
     private val stack = mutableListOf<JPBase>()
     private var tailingFunction: JPFunction? = null
 
+    private val bracketStack: MutableList<Char> = mutableListOf()
+
     data class Error(val message: String, val offset: Int)
 
     private var errors: MutableList<Error>? = null
 
-    fun Error(error: Error) {
-        if(errors == null)
+    fun addError(error: Error) {
+        if (errors == null)
             errors = mutableListOf()
 
         errors!!.add(error)
     }
+
+    fun errors(): List<Error> = errors?.toList() ?: emptyList()
 
 
     init {
@@ -98,6 +102,20 @@ class JsonPath(val path: String) {
         }
 
         while (tokenizer.hasMore()) {
+            if (!tokenizer.token().firstOrNull().let { it == '"' || it == '\'' }) {
+                // Validate opening and closing brackets, unless we are in a quoted string
+                if (tokenizer.char() in brackets.values) {
+                    bracketStack.add(tokenizer.char())
+                }
+                if (tokenizer.char() in brackets.keys) {
+                    if (bracketStack.isEmpty() || bracketStack.last() != brackets[tokenizer.char()]) {
+                        addError(Error("Unexpected opening bracket - ${tokenizer.char()}", tokenizer.pos))
+                    } else {
+                        bracketStack.removeLast()
+                    }
+                }
+            }
+
             when (tokenizer.char()) {
                 // Handle object property access with dot notation or array access
                 '.', '[' -> {
@@ -123,21 +141,30 @@ class JsonPath(val path: String) {
                     val token = tokenizer.token().trim()
                     if (token.startsWith("'")) {
                         // Quoted object keys needed to support spaces in property names
-                        if(!token.endsWith("'")) {
-                            Error(Error("Missing closing quote for property name", tokenizer.pos))
+                        if (!token.endsWith("'")) {
+                            addError(
+                                Error(
+                                    "Missing closing quote (${tokenizer.char()}) for property name",
+                                    tokenizer.pos
+                                )
+                            )
                         }
 
                         // Handle quoted property names
                         add(JPObject(token.trim('\'')))
-                    } else if(token.startsWith("\"")) {
+                    } else if (token.startsWith("\"")) {
                         // Some path suppliers might prefer double quotes, so we allow them here as well
-                        if(!token.endsWith("\"")) {
-                            Error(Error("Missing closing quote for property name", tokenizer.pos))
+                        if (!token.endsWith("\"")) {
+                            addError(
+                                Error(
+                                    "Missing closing quote (${tokenizer.char()}) for property name",
+                                    tokenizer.pos
+                                )
+                            )
                         }
                         // Handle quoted property names
                         add(JPObject(token.trim('\"')))
-                    }
-                    else {
+                    } else {
                         // Handle array indices
                         add(JPArray(token))
                     }
@@ -228,5 +255,6 @@ class JsonPath(val path: String) {
         val jsonEncoder = Json {
             prettyPrint = true
         }
+        private val brackets = mapOf(']' to '[', ')' to '(')
     }
 }
