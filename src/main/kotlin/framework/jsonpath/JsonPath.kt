@@ -1,10 +1,46 @@
 package com.tellusr.framework.jsonpath
 
+import com.tellusr.framework.jsonpath.path.JPArray
+import com.tellusr.framework.jsonpath.path.JPBase
+import com.tellusr.framework.jsonpath.path.JPFunction
+import com.tellusr.framework.jsonpath.path.JPObject
+import com.tellusr.framework.jsonpath.path.JPRoot
+import com.tellusr.framework.jsonpath.path.JPTokenizer
 import com.tellusr.framework.util.getAutoNamedLogger
 import com.tellusr.framework.util.messageAndCrumb
 import kotlinx.serialization.json.*
 
 
+/**
+ * JsonPath evaluates path expressions to extract data from JSON structures.
+ * Supports object property access, array indexing, and functions.
+ *
+ * Supported path features:
+ * - Root access ($)
+ * - Property access (dot notation or ['property'])
+ * - Array access ([index] or [*] for all elements)
+ * - Array slicing ([start:end])
+ * - Functions: count(), json(), join(), csv(), format()
+ *
+ * Example usage:
+ * ```kotlin
+ * val json = Json.parseToJsonElement("""
+ *   {
+ *     "store": {
+ *       "books": [
+ *         { "title": "Book 1", "price": 10 },
+ *         { "title": "Book 2", "price": 20 }
+ *       ]
+ *     }
+ *   }
+ * """)
+ *
+ * val path = JsonPath("$.store.books[*].title")
+ * val titles = path.eval(json) // Returns ["Book 1", "Book 2"]
+ * ```
+ *
+ * @property path The JSON path expression to evaluate
+ */
 class JsonPath(val path: String) {
     private val stack = mutableListOf<JPBase>()
     private var tailingFunction: JPFunction? = null
@@ -15,6 +51,12 @@ class JsonPath(val path: String) {
     }
 
 
+    /**
+     * Adds a new path element to the evaluation stack.
+     * Sets the element as child of the last element in stack.
+     *
+     * @param element The path element to add
+     */
     private fun add(element: JPBase) {
         // Set the new element as child of the last element in stack
         last()?.child = element
@@ -23,6 +65,11 @@ class JsonPath(val path: String) {
     }
 
 
+    /**
+     * Returns the last element in the evaluation stack.
+     *
+     * @return The last path element or null if stack is empty
+     */
     private fun last(): JPBase? =
         // Return the last element from stack or null if stack is empty
         stack.lastOrNull()
@@ -98,9 +145,22 @@ class JsonPath(val path: String) {
         }
     }
 
-    // Useful for variable parsers
+    /**
+     * Gets the root key from the path expression.
+     * Useful for applications that wants to use this
+     * as a variable parser that links the root key
+     * to a variable name or container key
+     *
+     * @return The root key or null if not present
+     */
     fun rootKey(): String? = (stack.firstOrNull() as? JPRoot)?.key
 
+    /**
+     * Evaluates the path expression against a JSON element.
+     *
+     * @param root The JSON element to evaluate against
+     * @return List of matched JSON elements or null if evaluation fails
+     */
     fun eval(root: JsonElement): List<JsonElement>? {
         return try {
             // Log the current state of the stack for debugging
@@ -118,6 +178,13 @@ class JsonPath(val path: String) {
         }
     }
 
+    /**
+     * Evaluates the path and returns results as formatted string.
+     * Converts matched elements to string representation.
+     *
+     * @param root The JSON element to evaluate against
+     * @return String representation of matched elements or null if none found
+     */
     fun getContent(root: JsonElement): String? =
         // Evaluate the path and transform results to string representation
         eval(root)?.mapNotNull { result ->

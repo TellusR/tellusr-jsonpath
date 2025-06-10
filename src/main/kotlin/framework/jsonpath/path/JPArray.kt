@@ -1,4 +1,4 @@
-package com.tellusr.framework.jsonpath
+package com.tellusr.framework.jsonpath.path
 
 import com.tellusr.framework.util.getAutoNamedLogger
 import kotlinx.serialization.json.*

@@ -1,4 +1,4 @@
-package com.tellusr.framework.jsonpath
+package com.tellusr.framework.jsonpath.path
 
 import kotlinx.serialization.json.JsonElement
 

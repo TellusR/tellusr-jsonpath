@@ -1,8 +1,7 @@
-package com.tellusr.framework.jsonpath
+package com.tellusr.framework.jsonpath.path
 
 import com.tellusr.framework.util.getAutoNamedLogger
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 
 class JPObject(val key: String) : JPBase() {

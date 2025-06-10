@@ -1,8 +1,7 @@
-package com.tellusr.framework.jsonpath
+package com.tellusr.framework.jsonpath.path
 
 import com.tellusr.framework.jsonpath.function.JPFunCsv
 import com.tellusr.framework.jsonpath.function.JPFunFormat
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
