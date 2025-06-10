@@ -1,5 +1,6 @@
 package com.tellusr.framework.jsonpath.path
 
+import com.tellusr.framework.jsonpath.function.JPFunctionHandler
 import com.tellusr.framework.jsonpath.function.JPFunCsv
 import com.tellusr.framework.jsonpath.function.JPFunFormat
 import kotlinx.serialization.encodeToString
@@ -36,17 +37,27 @@ class JPFunction(val f: String) {
                 JsonPrimitive(it)
             }
 
-            "csv" -> JPFunCsv(param).process(result)
-            "format" -> JPFunFormat(param).process(result)
-
-            else -> JsonNull
+            else -> functionHandlers[f]?.process(param, result)
         }
         return v
     }
 
 
     companion object {
-        val jsonEncoder = Json {
+
+        fun registerFunctionHandler(h: JPFunctionHandler) {
+            functionHandlers.put(h.functionName, h)
+        }
+
+
+        private val functionHandlers: MutableMap<String, JPFunctionHandler> = listOf<JPFunctionHandler>(
+            JPFunCsv(),
+            JPFunFormat()
+        ).associateBy {
+            it.functionName
+        }.toMutableMap()
+
+        private val jsonEncoder = Json {
             prettyPrint = true
         }
     }

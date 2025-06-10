@@ -2,8 +2,10 @@ package com.tellusr.framework.jsonpath.function
 
 import kotlinx.serialization.json.*
 
-class JPFunCsv(val param: String?): JPFun {
-    override fun process(result: List<JsonElement>?): JsonPrimitive? = result?.let { a ->
+class JPFunCsv: JPFunctionHandler {
+    override val functionName: String = "csv"
+
+    override fun process(param: String?, result: List<JsonElement>?): JsonPrimitive? = result?.let { a ->
         val header = a.firstOrNull()?.jsonObject?.keys ?: listOf()
         val columns = a.map { o ->
             o.jsonObject.values.map { it.jsonPrimitive.contentOrNull ?: "" }
