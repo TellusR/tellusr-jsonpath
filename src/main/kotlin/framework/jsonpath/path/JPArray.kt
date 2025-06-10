@@ -30,13 +30,13 @@ class JPArray(val key: String) : JPBase() {
             val r = range(array)
             r.mapNotNull { i ->
                 val element = array.get(i)
-                child?.get(element) ?: listOf(element)
+                next?.get(element) ?: listOf(element)
             }.flatten()
         } ?: listOf()
 
 
     override fun toString(): String =
-        "${javaClass.simpleName}[$key] ${child.toString()}"
+        "${javaClass.simpleName}[$key] ${next.toString()}"
 
 
     companion object {
