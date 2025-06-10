@@ -99,12 +99,17 @@ override val functionName = "myFunction"
 ```
 
 # JsonPath for Kotlin Overview
-This library provides a lightweight JSONPath implementation for Kotlin, allowing you to extract data from JSON structures using path expressions.
+
+This library provides a lightweight JSONPath implementation for Kotlin, allowing you to extract data from JSON 
+structures using path expressions.
+
+
 ## Core Features
 - Access JSON elements using path expressions
 - Support for dot notation () or bracket notation () `$.store.book``$['store']['book']`
 - Array access with indexes or wildcards
 - Built-in functions like , , , , and `count()``json()``join()``csv()``format()`
+
 
 ## Installation
 To add the library to your project:
@@ -131,7 +136,7 @@ dependencies {
 
 ## Basic Usage
 
-``` kotlin
+```kotlin
 // Parse JSON
 val jsonElement = """
     {
@@ -153,7 +158,7 @@ val stringResult = JsonPath("$['docScore'].json()").evalContent(jsonElement)
 
 You can extend functionality by implementing the interface: `JPFunctionHandler`
 
-``` kotlin
+```kotlin
 import com.tellusr.framework.jsonpath.function.JPFunctionHandler
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
