@@ -8,7 +8,6 @@ import com.tellusr.framework.jsonpath.path.JPRoot
 import com.tellusr.framework.jsonpath.path.JPTokenizer
 import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import com.tellusr.framework.jsonpath.util.messageAndCrumb
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
@@ -45,6 +44,17 @@ import kotlinx.serialization.json.*
 class JsonPath(val path: String) {
     private val stack = mutableListOf<JPBase>()
     private var tailingFunction: JPFunction? = null
+
+    data class Error(val message: String, val offset: Int)
+
+    private var errors: MutableList<Error>? = null
+
+    fun Error(error: Error) {
+        if(errors == null)
+            errors = mutableListOf()
+
+        errors!!.add(error)
+    }
 
 
     init {
@@ -112,9 +122,22 @@ class JsonPath(val path: String) {
                 ']' -> {
                     val token = tokenizer.token().trim()
                     if (token.startsWith("'")) {
+                        // Quoted object keys needed to support spaces in property names
+                        if(!token.endsWith("'")) {
+                            Error(Error("Missing closing quote for property name", tokenizer.pos))
+                        }
+
                         // Handle quoted property names
                         add(JPObject(token.trim('\'')))
-                    } else {
+                    } else if(token.startsWith("\"")) {
+                        // Some path suppliers might prefer double quotes, so we allow them here as well
+                        if(!token.endsWith("\"")) {
+                            Error(Error("Missing closing quote for property name", tokenizer.pos))
+                        }
+                        // Handle quoted property names
+                        add(JPObject(token.trim('\"')))
+                    }
+                    else {
                         // Handle array indices
                         add(JPArray(token))
                     }
