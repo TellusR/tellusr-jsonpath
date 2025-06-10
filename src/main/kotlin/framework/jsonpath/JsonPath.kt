@@ -84,26 +84,9 @@ class JsonPath(val path: String) {
     }
 
 
-    /**
-     * Returns the tail element in the path chain.
-     *
-     * @return The tail path element or null if chain is empty
-     */
-    private fun last(): JPBase? =
-        // Return the last element from stack or null if stack is empty
-        tail
-
-
     private fun compile(p: String) {
         // Initialize tokenizer with trimmed input path
         var tokenizer = JPTokenizer(p.trim())
-
-        // Handle root element if path starts with $
-        if (tokenizer.char() == '$') {
-            add(JPRoot())
-            tokenizer.inc()
-            tokenizer.startToken()
-        }
 
         while (tokenizer.hasMore()) {
             if (!tokenizer.token().firstOrNull().let { it == '"' || it == '\'' }) {
@@ -216,21 +199,17 @@ class JsonPath(val path: String) {
      * @param root The JSON element to evaluate against
      * @return List of matched JSON elements or null if evaluation fails
      */
-    fun eval(root: JsonElement): List<JsonElement>? {
-        return try {
-            // Log the current state of the stack for debugging
-            logger.trace("Head: " + head.toString())
-            // Get results by evaluating the path against root element
-            val res = head?.get(root)
-            // Apply tailing function if present, otherwise return direct results
-            tailingFunction?.process(head?.get(root))?.let {
-                listOf(it)
-            } ?: res
-        } catch (ex: Throwable) {
-            // Log any errors and return null on failure
-            logger.info(ex.messageAndCrumb)
-            null
-        }
+    fun eval(root: JsonElement): List<JsonElement>? = try {
+        // Get results by evaluating the path against root element
+        val res = head?.get(root)
+        // Apply tailing function if present, otherwise return direct results
+        tailingFunction?.process(head?.get(root))?.let {
+            listOf(it)
+        } ?: res
+    } catch (ex: Throwable) {
+        // Log any errors and return null on failure
+        logger.info(ex.messageAndCrumb)
+        null
     }
 
     /**
