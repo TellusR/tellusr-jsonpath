@@ -46,6 +46,10 @@ dependencies {
 Extract data from JSON using JsonPath expressions:
 
 ```kotlin
+import com.tellusr.framework.jsonpath.JsonPath
+import kotlinx.serialization.json.JsonElement
+
+
 fun jsonPathExample() {
     val testJson = """
             {
@@ -169,6 +173,4 @@ class MyFunction : JPFunctionHandler {
 fun bootstrap() {
     JPFunction.addFunctionHandler(MyFunction())
 }
-
-
 ```
