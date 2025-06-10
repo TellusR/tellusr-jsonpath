@@ -15,8 +15,6 @@ Supports a subset of JSONPath syntax with the following features:
 
 ## Installation
 
-Add the dependency to your build.gradle.kts:
-
 Add the dependency to your `build.gradle.kts`:
 
 ```kotlin
