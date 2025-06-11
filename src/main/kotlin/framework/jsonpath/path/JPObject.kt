@@ -7,16 +7,12 @@ import kotlinx.serialization.json.jsonObject
 class JPObject(val key: String) : JPBase() {
     override fun get(jsonElement: JsonElement): List<JsonElement>? {
         return jsonElement.jsonObject.get(key)?.let { element ->
-            if (child != null) {
-                child?.get(element)
-            } else {
-                listOf(element)
-            }
+            next?.get(element) ?: listOf(element)
         }
     }
 
     override fun toString(): String =
-        "${javaClass.simpleName}($key) ${child.toString()}"
+        "${javaClass.simpleName}($key) ${next.toString()}"
 
     companion object {
         val logger = getAutoNamedLogger()

@@ -8,12 +8,12 @@ import com.tellusr.framework.jsonpath.path.JPRoot
 import com.tellusr.framework.jsonpath.path.JPTokenizer
 import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import com.tellusr.framework.jsonpath.util.messageAndCrumb
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
 /**
  * JsonPath evaluates path expressions to extract data from JSON structures.
+ * Uses a linked list of path elements connected via next references with head and tail pointers.
  * Supports object property access, array indexing, and functions.
  *
  * Supported path features:
@@ -43,8 +43,24 @@ import kotlinx.serialization.json.*
  * @property path The JSON path expression to evaluate
  */
 class JsonPath(val path: String) {
-    private val stack = mutableListOf<JPBase>()
+    private var head: JPBase? = null
+    private var tail: JPBase? = null
     private var tailingFunction: JPFunction? = null
+
+    private val bracketStack: MutableList<Char> = mutableListOf()
+
+    data class Error(val message: String, val offset: Int)
+
+    private var errors: MutableList<Error>? = null
+
+    fun addError(error: Error) {
+        if (errors == null)
+            errors = mutableListOf()
+
+        errors!!.add(error)
+    }
+
+    fun errors(): List<Error> = errors?.toList() ?: emptyList()
 
 
     init {
@@ -53,41 +69,40 @@ class JsonPath(val path: String) {
 
 
     /**
-     * Adds a new path element to the evaluation stack.
-     * Sets the element as child of the last element in stack.
+     * Adds a new path element to the path chain.
+     * Links it to the previous element via next reference and updates tail.
      *
      * @param element The path element to add
      */
     private fun add(element: JPBase) {
-        // Set the new element as child of the last element in stack
-        last()?.child = element
-        // Add the new element to the stack
-        stack.add(element)
+        if(head == null)
+            head = element
+        // Set the new element as child of tail
+        tail?.next = element
+        // Make the new element the new tail
+        tail = element
     }
-
-
-    /**
-     * Returns the last element in the evaluation stack.
-     *
-     * @return The last path element or null if stack is empty
-     */
-    private fun last(): JPBase? =
-        // Return the last element from stack or null if stack is empty
-        stack.lastOrNull()
 
 
     private fun compile(p: String) {
         // Initialize tokenizer with trimmed input path
-        var tokenizer = JPTokenizer(p.trim())
-
-        // Handle root element if path starts with $
-        if (tokenizer.char() == '$') {
-            add(JPRoot())
-            tokenizer.inc()
-            tokenizer.startToken()
-        }
+        val tokenizer = JPTokenizer(p.trim())
 
         while (tokenizer.hasMore()) {
+            if (!tokenizer.token().firstOrNull().let { it == '"' || it == '\'' }) {
+                // Validate opening and closing brackets, unless we are in a quoted string
+                if (tokenizer.char() in brackets.values) {
+                    bracketStack.add(tokenizer.char())
+                }
+                if (tokenizer.char() in brackets.keys) {
+                    if (bracketStack.isEmpty() || bracketStack.last() != brackets[tokenizer.char()]) {
+                        addError(Error("Unexpected opening bracket - ${tokenizer.char()}", tokenizer.pos))
+                    } else {
+                        bracketStack.removeLast()
+                    }
+                }
+            }
+
             when (tokenizer.char()) {
                 // Handle object property access with dot notation or array access
                 '.', '[' -> {
@@ -95,7 +110,7 @@ class JsonPath(val path: String) {
                         val token = tokenizer.token()
                         // Add root element for start token, otherwise add as object property
                         // The token is the name of the object property
-                        if (stack.isEmpty())
+                        if (head == null)
                             add(JPRoot(token))
                         else
                             add(JPObject(token))
@@ -112,8 +127,30 @@ class JsonPath(val path: String) {
                 ']' -> {
                     val token = tokenizer.token().trim()
                     if (token.startsWith("'")) {
+                        // Quoted object keys needed to support spaces in property names
+                        if (!token.endsWith("'")) {
+                            addError(
+                                Error(
+                                    "Missing closing quote (${tokenizer.char()}) for property name",
+                                    tokenizer.pos
+                                )
+                            )
+                        }
+
                         // Handle quoted property names
                         add(JPObject(token.trim('\'')))
+                    } else if (token.startsWith("\"")) {
+                        // Some path suppliers might prefer double quotes, so we allow them here as well
+                        if (!token.endsWith("\"")) {
+                            addError(
+                                Error(
+                                    "Missing closing quote (${tokenizer.char()}) for property name",
+                                    tokenizer.pos
+                                )
+                            )
+                        }
+                        // Handle quoted property names
+                        add(JPObject(token.trim('\"')))
                     } else {
                         // Handle array indices
                         add(JPArray(token))
@@ -154,7 +191,7 @@ class JsonPath(val path: String) {
      *
      * @return The root key or null if not present
      */
-    fun rootKey(): String? = (stack.firstOrNull() as? JPRoot)?.key
+    fun rootKey(): String? = (head as? JPRoot)?.key
 
     /**
      * Evaluates the path expression against a JSON element.
@@ -162,21 +199,17 @@ class JsonPath(val path: String) {
      * @param root The JSON element to evaluate against
      * @return List of matched JSON elements or null if evaluation fails
      */
-    fun eval(root: JsonElement): List<JsonElement>? {
-        return try {
-            // Log the current state of the stack for debugging
-            logger.trace("Stack: " + stack.firstOrNull().toString())
-            // Get results by evaluating the path against root element
-            val res = stack.firstOrNull()?.get(root)
-            // Apply tailing function if present, otherwise return direct results
-            tailingFunction?.process(stack.firstOrNull()?.get(root))?.let {
-                listOf(it)
-            } ?: res
-        } catch (ex: Throwable) {
-            // Log any errors and return null on failure
-            logger.info(ex.messageAndCrumb)
-            null
-        }
+    fun eval(root: JsonElement): List<JsonElement>? = try {
+        // Get results by evaluating the path against root element
+        val res = head?.get(root)
+        // Apply tailing function if present, otherwise return direct results
+        tailingFunction?.process(head?.get(root))?.let {
+            listOf(it)
+        } ?: res
+    } catch (ex: Throwable) {
+        // Log any errors and return null on failure
+        logger.info(ex.messageAndCrumb)
+        null
     }
 
     /**
@@ -205,5 +238,6 @@ class JsonPath(val path: String) {
         val jsonEncoder = Json {
             prettyPrint = true
         }
+        private val brackets = mapOf(']' to '[', ')' to '(')
     }
 }
