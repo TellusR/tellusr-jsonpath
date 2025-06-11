@@ -83,6 +83,13 @@ class JsonPath(val path: String) {
         tail = element
     }
 
+    private fun addRootOrObject(token: String) {
+        if (head == null)
+            add(JPRoot(token))
+        else
+            add(JPObject(token))
+    }
+
 
     private fun compile(p: String) {
         // Initialize tokenizer with trimmed input path
@@ -110,10 +117,7 @@ class JsonPath(val path: String) {
                         val token = tokenizer.token()
                         // Add root element for start token, otherwise add as object property
                         // The token is the name of the object property
-                        if (head == null)
-                            add(JPRoot(token))
-                        else
-                            add(JPObject(token))
+                        addRootOrObject(token)
                         tokenizer.inc()
                         tokenizer.startToken()
                     } else {
@@ -179,11 +183,7 @@ class JsonPath(val path: String) {
 
         // Handle any remaining token as object property
         if (!tokenizer.isTokenEmpty()) {
-            val token = tokenizer.token()
-            if (head == null)
-                add(JPRoot(token))
-            else
-                add(JPObject(token))
+            addRootOrObject(tokenizer.token())
         }
     }
 
