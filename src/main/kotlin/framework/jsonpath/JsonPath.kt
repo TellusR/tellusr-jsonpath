@@ -106,7 +106,7 @@ class JsonPath(val path: String) {
 
             when (tokenizer.char()) {
                 // Handle object property access with dot notation or array access
-                '.', '[' -> {
+                '.', '[', ' ', '\n' -> {
                     if (!tokenizer.isTokenEmpty()) {
                         val token = tokenizer.token()
                         // Add root element for start token, otherwise add as object property
@@ -180,7 +180,11 @@ class JsonPath(val path: String) {
 
         // Handle any remaining token as object property
         if (!tokenizer.isTokenEmpty()) {
-            add(JPObject(tokenizer.token()))
+            val token = tokenizer.token()
+            if (head == null)
+                add(JPRoot(token))
+            else
+                add(JPObject(token))
         }
     }
 
