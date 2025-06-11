@@ -9,6 +9,7 @@ import com.tellusr.framework.jsonpath.path.JPTokenizer
 import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import com.tellusr.framework.jsonpath.util.messageAndCrumb
 import kotlinx.serialization.json.*
+import kotlin.collections.mapNotNull
 
 
 /**
@@ -75,7 +76,7 @@ class JsonPath(val path: String) {
      * @param element The path element to add
      */
     private fun add(element: JPBase) {
-        if(head == null)
+        if (head == null)
             head = element
         // Set the new element as child of tail
         tail?.next = element
@@ -199,13 +200,11 @@ class JsonPath(val path: String) {
      * @param root The JSON element to evaluate against
      * @return List of matched JSON elements or null if evaluation fails
      */
-    fun eval(root: JsonElement): List<JsonElement>? = try {
+    fun eval(root: JsonElement): JsonElement? = try {
         // Get results by evaluating the path against root element
         val res = head?.get(root)
         // Apply tailing function if present, otherwise return direct results
-        tailingFunction?.process(head?.get(root))?.let {
-            listOf(it)
-        } ?: res
+        tailingFunction?.process(head?.get(root)) ?: res
     } catch (ex: Throwable) {
         // Log any errors and return null on failure
         logger.info(ex.messageAndCrumb)
@@ -221,17 +220,26 @@ class JsonPath(val path: String) {
      */
     fun evalContent(root: JsonElement): String? =
         // Evaluate the path and transform results to string representation
-        eval(root)?.mapNotNull { result ->
-            when (result) {
-                // Skip null values
-                is JsonNull -> null
-                // Extract primitive values directly
-                is JsonPrimitive -> result.jsonPrimitive.contentOrNull
-                // Convert complex objects to JSON string
-                else -> jsonEncoder.encodeToString<JsonElement>(result)
-            }
-            // Join results with newlines and return null if empty
-        }?.joinToString("\n")?.ifBlank { null }
+        when (val e = eval(root)) {
+            is JsonArray -> e.mapNotNull { result ->
+                when (result) {
+                    // Skip null values
+                    is JsonNull -> null
+                    // Extract primitive values directly
+                    is JsonPrimitive -> result.jsonPrimitive.contentOrNull
+                    // Convert complex objects to JSON string
+                    else -> jsonEncoder.encodeToString<JsonElement>(result)
+                }
+                // Join results with newlines and return null if empty
+            }.joinToString("\n")?.ifBlank { null }
+
+            is JsonObject -> jsonEncoder.encodeToString<JsonElement>(e)
+            is JsonPrimitive -> e.jsonPrimitive.contentOrNull
+            else -> null
+        }
+
+
+
 
     companion object {
         val logger = getAutoNamedLogger()

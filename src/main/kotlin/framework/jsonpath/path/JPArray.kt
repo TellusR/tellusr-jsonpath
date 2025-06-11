@@ -25,14 +25,20 @@ class JPArray(val key: String) : JPBase() {
         }
     }
 
-    override fun get(jsonElement: JsonElement): List<JsonElement>? =
-        jsonElement.jsonArray?.let { array ->
+    override fun get(jsonElement: JsonElement): JsonElement? =
+        jsonElement.jsonArray.let { array ->
             val r = range(array)
             r.mapNotNull { i ->
                 val element = array.get(i)
-                next?.get(element) ?: listOf(element)
-            }.flatten()
-        } ?: listOf()
+                next?.get(element) ?: element
+            }.let { it ->
+                when (it.size) {
+                    0 -> empty
+                    1 -> it.first()
+                    else -> JsonArray(it)
+                }
+            }
+        }
 
 
     override fun toString(): String =
@@ -42,6 +48,8 @@ class JPArray(val key: String) : JPBase() {
     companion object {
         val logger = getAutoNamedLogger()
         val jsonEncoder = Json { prettyPrint = true}
+
+        val empty = JsonArray(emptyList())
     }
 }
 
