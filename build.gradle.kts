@@ -37,6 +37,10 @@ publishing {
 
             groupId = group as String
             artifactId = "tellusr-jsonpath"
+            artifact(tasks.register("sourcesJar", Jar::class) {
+                from(sourceSets["main"].allSource)
+                archiveClassifier.set("sources")
+            })
             version = version as String
         }
     }
