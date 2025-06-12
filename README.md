@@ -108,7 +108,7 @@ structures using path expressions.
 - Access JSON elements using path expressions
 - Support for dot notation () or bracket notation () `$.store.book``$['store']['book']`
 - Array access with indexes or wildcards
-- Built-in functions like , , , , and `count()``json()``join()``csv()``format()`
+- Built-in functions like `count()`, `json()`, `join()`, `csv()` and `format()`
 
 
 ## Installation

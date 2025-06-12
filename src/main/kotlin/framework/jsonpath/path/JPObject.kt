@@ -5,9 +5,9 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 
 class JPObject(val key: String) : JPBase() {
-    override fun get(jsonElement: JsonElement): List<JsonElement>? {
+    override fun get(jsonElement: JsonElement): JsonElement? {
         return jsonElement.jsonObject.get(key)?.let { element ->
-            next?.get(element) ?: listOf(element)
+            next?.get(element) ?: element
         }
     }
 

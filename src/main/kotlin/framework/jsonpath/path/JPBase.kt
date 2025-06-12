@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonElement
 abstract class JPBase {
     var next: JPBase? = null
 
-    abstract fun get(jsonElement: JsonElement): List<JsonElement>?
+    abstract fun get(jsonElement: JsonElement): JsonElement?
 
     override fun toString(): String =
         "${this.javaClass.simpleName} ${next.toString()}"
