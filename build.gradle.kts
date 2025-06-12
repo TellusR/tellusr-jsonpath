@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.tellusr"
-version = "0.9.4"
+version = "0.9.5-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -25,6 +25,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging.showStandardStreams = true
 }
 kotlin {
     jvmToolchain(21)

@@ -26,7 +26,7 @@ class JsonPathTest {
     @Test
     fun testJsonPathDocScorePrettyPrint() {
         val jsonEncoder = Json { prettyPrint = true }
-        val jsonElement = Json.parseToJsonElement(json)
+        val jsonElement = Json.parseToJsonElement(bigJsonTest)
         val res = JsonPath("$['docScore']").eval(jsonElement)
         jsonEncoder.encodeToString(res).let {
             println(it)
@@ -75,6 +75,23 @@ class JsonPathTest {
 
     }
 
+    @Test
+    fun testNotFound() {
+        // Given
+        val jsonElement = Json.parseToJsonElement(bigJsonTest)
+
+        val jsonPath = JsonPath("$.notFound")
+
+        // When
+        val result = jsonPath.eval(jsonElement)
+
+        // Then
+        assertNotNull(result)
+        assertEquals("null", result.toString())
+
+
+    }
+
     companion object {
         private val logger = getAutoNamedLogger()
 
@@ -85,7 +102,7 @@ class JsonPathTest {
             }
         """.trimIndent()
 
-        val json = """
+        val bigJsonTest = """
             {
                 "import_reference": "https://no.wikipedia.org/wiki/Elsa_Lystad",
                 "score": 0.5,
