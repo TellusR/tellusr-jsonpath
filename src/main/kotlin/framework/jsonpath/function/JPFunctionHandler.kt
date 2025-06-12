@@ -32,5 +32,5 @@ interface JPFunctionHandler {
      * @param result Optional list of JSON elements that the function should process
      * @return Processed result as JsonPrimitive, or null if processing fails
      */
-    fun process(param: String?, result: List<JsonElement>?): JsonPrimitive?
+    fun process(param: String?, result: JsonElement?): JsonPrimitive?
 }

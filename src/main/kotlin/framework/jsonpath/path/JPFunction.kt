@@ -10,28 +10,16 @@ import kotlinx.serialization.json.*
 class JPFunction(val f: String) {
     var param: String = ""
 
-    fun process(result: List<JsonElement>?): JsonPrimitive? {
+    fun process(result: JsonElement?): JsonPrimitive? {
         val v = when (f) {
-            "count" -> JsonPrimitive(result?.size ?: 0)
-            "json" -> result?.let {
-                if(it.size == 1) {
-                    JsonPrimitive(
-                        "```\n" +
-                                jsonEncoder.encodeToString<JsonElement>(it.first())
-                                + "\n```"
-                    )
-                }
-                else {
-                    JsonPrimitive(
-                        "```\n" +
-                                jsonEncoder.encodeToString(it)
-                                + "\n```"
-                    )
-
+            "count" -> JsonPrimitive(result?.jsonArray?.size ?: 0)
+            "json" -> result?.let { r ->
+                jsonEncoder.encodeToString<JsonElement>(r).let {
+                    JsonPrimitive(it)
                 }
             }
 
-            "join" -> result?.joinToString {
+            "join" -> result?.jsonArray?.joinToString {
                 it.jsonPrimitive.content
             }?.let {
                 JsonPrimitive(it)
