@@ -3,6 +3,7 @@ package framework.jsonpath
 import com.tellusr.framework.jsonpath.JsonPath
 import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Test
@@ -88,8 +89,20 @@ class JsonPathTest {
         // Then
         assertNotNull(result)
         assertEquals("null", result.toString())
+    }
 
+    @Test
+    fun testFunction() {
+        // Given
+        val jsonElement = Json.parseToJsonElement(testJson)
 
+        val jsonPath = JsonPath("$.json()")
+
+        // When
+        val result = jsonPath.eval(jsonElement)
+
+        // Then
+        logger.info("result: ${result?.jsonPrimitive?.contentOrNull}")
     }
 
     companion object {

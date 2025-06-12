@@ -15,7 +15,7 @@ class JPFunction(val f: String) {
             "count" -> JsonPrimitive(result?.jsonArray?.size ?: 0)
             "json" -> result?.let { r ->
                 jsonEncoder.encodeToString<JsonElement>(r).let {
-                    JsonPrimitive(it)
+                    JsonPrimitive("```json\n$it\n```")
                 }
             }
 
