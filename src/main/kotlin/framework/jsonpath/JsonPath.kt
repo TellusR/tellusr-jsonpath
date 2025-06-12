@@ -1,5 +1,6 @@
 package com.tellusr.framework.jsonpath
 
+import com.tellusr.framework.jsonpath.exception.JsonPathException
 import com.tellusr.framework.jsonpath.path.JPArray
 import com.tellusr.framework.jsonpath.path.JPBase
 import com.tellusr.framework.jsonpath.path.JPFunction
@@ -85,10 +86,11 @@ class JsonPath(val path: String) {
     }
 
     private fun addRootOrObject(token: String) {
-        if (head == null)
+        if (head == null) {
             add(JPRoot(token))
-        else
+        } else {
             add(JPObject(token))
+        }
     }
 
 
@@ -196,7 +198,8 @@ class JsonPath(val path: String) {
      *
      * @return The root key or null if not present
      */
-    fun rootKey(): String? = (head as? JPRoot)?.key
+    fun rootKey(): String = (head as? JPRoot)?.key
+        ?: throw JsonPathException.IllegalState("No root key found in path expression: $path - ($head)")
 
     /**
      * Evaluates the path expression against a JSON element.
@@ -241,8 +244,6 @@ class JsonPath(val path: String) {
             is JsonPrimitive -> e.jsonPrimitive.contentOrNull
             else -> null
         }
-
-
 
 
     companion object {

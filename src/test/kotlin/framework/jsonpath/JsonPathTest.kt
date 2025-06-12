@@ -1,6 +1,7 @@
 package framework.jsonpath
 
 import com.tellusr.framework.jsonpath.JsonPath
+import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -37,7 +38,46 @@ class JsonPathTest {
         assert(res.jsonPrimitive.floatOrNull == 0.5f)
     }
 
+    @Test
+    fun testJsonPathHead() {
+        // Given
+        val jsonPath = JsonPath("$['docScore']")
+
+        // When
+        val rootKey = jsonPath.rootKey()
+        logger.info("rootKey: $rootKey")
+
+        // Then
+        assertNotNull(rootKey)
+        assertEquals("$", rootKey.toString())
+    }
+
+    @Test
+    fun testJsonPathShort() {
+        // Given
+        val jsonPath = JsonPath("short")
+
+        // When
+        val rootKey = jsonPath.rootKey()
+        logger.info("rootKey: $rootKey")
+
+        // Then
+        assertNotNull(rootKey)
+        assertEquals("short", rootKey.toString())
+
+        // When
+        val jsonElement = Json.parseToJsonElement(testJson)
+        val result = jsonPath.eval(jsonElement)
+
+        // Then
+        assertNotNull(result)
+        logger.info("result: $result")
+
+    }
+
     companion object {
+        private val logger = getAutoNamedLogger()
+
         private val testJson = """
             {
                 "docScore": 0.5,
