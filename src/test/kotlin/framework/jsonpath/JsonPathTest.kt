@@ -82,7 +82,11 @@ class JsonPathTest {
         val jsonElement = Json.parseToJsonElement(bigJsonTest)
 
         // Given
-        val result = JsonPath("\$.docHits[*].relevantSegments[middle].value.join()").evalContent(jsonElement)
+        val p = "\$.docHits[0].relevantSegments[*].value.join()"
+        val p2 = "\$.docHits[*].relevantSegments[middle].value.join()"
+
+        val result = JsonPath(p).eval(jsonElement)
+
 
         logger.info("result: $result")
     }

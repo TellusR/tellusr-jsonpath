@@ -4,6 +4,7 @@ import com.tellusr.framework.jsonpath.function.JPFunctionHandler
 import com.tellusr.framework.jsonpath.function.JPFunCsv
 import com.tellusr.framework.jsonpath.function.JPFunFormat
 import com.tellusr.framework.jsonpath.util.JsonToString
+import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
@@ -20,9 +21,13 @@ class JPFunction(val f: String) {
                 }
             }
 
-            "join" -> JsonToString.jsonToString(result ?: JsonNull).let {
-                JsonPrimitive(it)
+            "join" -> {
+                logger.info("Joining ${result.toString()}")
+                JsonToString.jsonToString(result ?: JsonNull).let {
+                    JsonPrimitive(it)
+                }
             }
+
 
             else -> functionHandlers[f]?.process(param, result)
         }
@@ -31,6 +36,8 @@ class JPFunction(val f: String) {
 
 
     companion object {
+        val logger = getAutoNamedLogger()
+
 
         fun registerFunctionHandler(h: JPFunctionHandler) {
             functionHandlers.put(h.functionName, h)
