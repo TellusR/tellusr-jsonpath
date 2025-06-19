@@ -1,3 +1,5 @@
+import java.time.Instant
+
 plugins {
     kotlin("jvm") version "2.1.20"
     `maven-publish`
@@ -59,4 +61,29 @@ publishing {
             }
         }
     }
+
 }
+
+
+object This {
+    val tag: String
+        get() {
+            val t = env("TAG")
+            if (t != null) {
+                return "$t / ${Instant.now()}"
+            }
+            return Instant.now().toString()
+        }
+
+    fun env(v: String): String? = System.getenv(v)
+}
+
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Implementation-Title"] = "${project.group}:${project.name}"
+        attributes["Implementation-Version"] = "${project.version} (${This.tag})"
+        attributes["Implementation-Vendor"] = "TellusR"
+    }
+}
+
