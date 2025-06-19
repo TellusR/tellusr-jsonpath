@@ -3,24 +3,13 @@ package com.tellusr.framework.jsonpath.path
 import com.tellusr.framework.jsonpath.function.JPFunctionHandler
 import com.tellusr.framework.jsonpath.function.JPFunCsv
 import com.tellusr.framework.jsonpath.function.JPFunFormat
+import com.tellusr.framework.jsonpath.util.JsonToString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 
 class JPFunction(val f: String) {
     var param: String = ""
-
-    fun jsonToString(je: JsonElement): String? =
-        when (je) {
-            is JsonPrimitive -> je.contentOrNull
-            is JsonArray -> je.mapNotNull {
-                jsonToString(it)
-            }.joinToString("\n\n")
-
-            is JsonObject -> je.entries.joinToString("\n\n") {
-                "${it.key}: ${jsonToString(it.value)}"
-            }
-        }
 
     fun process(result: JsonElement?): JsonPrimitive? {
         val v = when (f) {
@@ -31,7 +20,7 @@ class JPFunction(val f: String) {
                 }
             }
 
-            "join" -> jsonToString(result ?: JsonNull).let {
+            "join" -> JsonToString.jsonToString(result ?: JsonNull).let {
                 JsonPrimitive(it)
             }
 
