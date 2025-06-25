@@ -22,7 +22,7 @@ class JPFunction(val f: String) {
             }
 
             "join" -> {
-                logger.info("Joining ${result.toString()}")
+                logger.trace("Joining ${result.toString()}")
                 JsonToString.jsonToString(result ?: JsonNull).let {
                     JsonPrimitive(it)
                 }
