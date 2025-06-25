@@ -214,7 +214,7 @@ class JsonPath(val path: String) {
         tailingFunction?.process(head?.get(root)) ?: res
     } catch (ex: Throwable) {
         // Log any errors and return null on failure
-        logger.info(ex.messageAndCrumb)
+        logger.warn("For $path: {}", ex.messageAndCrumb)
         null
     }
 
