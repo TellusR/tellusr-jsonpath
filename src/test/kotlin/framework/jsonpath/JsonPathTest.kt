@@ -3,7 +3,6 @@ package framework.jsonpath
 import com.tellusr.framework.jsonpath.JsonPath
 import com.tellusr.framework.jsonpath.util.getAutoNamedLogger
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Test
@@ -73,7 +72,6 @@ class JsonPathTest {
         // Then
         assertNotNull(result)
         logger.info("result: $result")
-
     }
 
     @Test
